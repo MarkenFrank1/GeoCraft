@@ -1,5 +1,8 @@
 package com.markstam1.geocraft;
 
-public class GeoCraft {
+import org.bukkit.plugin.java.JavaPlugin;
 
+public class GeoCraft extends JavaPlugin
+{
+	
 }
