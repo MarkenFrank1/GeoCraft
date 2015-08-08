@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.bukkit.ChatColor;
+
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -13,16 +14,34 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.material.Sign;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class GeoCraft extends JavaPlugin implements Listener
 {
+	
+	File geocachesfile = new File(getDataFolder(), "geocaches.yml");
+	FileConfiguration config = YamlConfiguration.loadConfiguration(geocachesfile);
+	
 	public void onEnable()
 	{
 		getServer().getPluginManager().registerEvents(this, this);
 		getConfig().options().copyDefaults(false);
+		saveConfig();
+	}
+	
+	public void saveConfig()
+	{
+		try 
+		{
+			config.save(geocachesfile);
+		} 
+		catch (IOException e1) 
+		{
+			e1.printStackTrace();
+		}
 	}
 	
 	@EventHandler
@@ -49,18 +68,33 @@ public class GeoCraft extends JavaPlugin implements Listener
 					e.setLine(3, ChatColor.DARK_RED + playerName);
 					p.sendMessage(ChatColor.GREEN + "[GeoCraft] Geocache created.");
 					String cacheName = e.getLine(1);
-					File geocachesfile = new File(getDataFolder(), "geocaches.yml");
-					FileConfiguration config = YamlConfiguration.loadConfiguration(geocachesfile);
+	
 					config.set("geocaches." + cacheName + ".hider", playerName);
+					saveConfig();
 					
-					try {
-						config.save(geocachesfile);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 				}
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onBlockBreak(BlockBreakEvent e)
+	{
+		Block block = e.getBlock();
+		if(block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST)
+		{
+			org.bukkit.block.Sign sign = (org.bukkit.block.Sign) block.getState();
+			
+			String firstLine = ChatColor.stripColor(sign.getLine(0));
+			if(firstLine.equalsIgnoreCase("[GeoCraft]"))
+			{
+				config.set("geocaches." + sign.getLine(1), null);
+				saveConfig();
+				e.getPlayer().sendMessage(ChatColor.GREEN + "[GeoCraft] Geocache deleted.");
+			}
+			
+		}
+		
 	}
 	
 	@Override
@@ -71,21 +105,31 @@ public class GeoCraft extends JavaPlugin implements Listener
 			if(args.length == 0) //Player types /geo without arguments
 			{
 				sender.sendMessage("Available commands:");
-				sender.sendMessage(ChatColor.GOLD + "/geo list " + ChatColor.WHITE + "Shows all listed geocaches");				return true;
+				sender.sendMessage(ChatColor.GOLD + "/geo list: " + ChatColor.WHITE + "Shows all listed geocaches");	
+				return true;
 			}
 			
-			if(args.length >= 1)
+			if(args.length >= 1) //Player types /geo with an argument
 			{
 				if(args[0].equalsIgnoreCase("list"))
 				{
-					sender.sendMessage("Insert geocaches here...");
+					sender.sendMessage(ChatColor.GOLD + "Available geocaches:");
+					int geonr = 0;
+					
+					for(String geoKey : config.getConfigurationSection("geocaches").getKeys(false))
+					{
+						geonr++;
+						
+						sender.sendMessage(ChatColor.AQUA + "" + geonr + ". " + geoKey);
+						
+					}
 					return true;
 				}
 				
 				if(args[0].equalsIgnoreCase("help"))
 				{
 					sender.sendMessage("Available commands:");
-					sender.sendMessage(ChatColor.GOLD + "/geo list " + ChatColor.WHITE + "Shows all listed geocaches");					
+					sender.sendMessage(ChatColor.GOLD + "/geo list: " + ChatColor.WHITE + "Shows all listed geocaches");					
 					return true;
 				}
 				
