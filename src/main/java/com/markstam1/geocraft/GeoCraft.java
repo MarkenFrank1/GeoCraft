@@ -3,9 +3,11 @@ package com.markstam1.geocraft;
 import java.io.File;
 import java.io.IOException;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -49,28 +51,47 @@ public class GeoCraft extends JavaPlugin implements Listener
 	{
 		Player p = e.getPlayer();
 		String playerName = p.getName();
-		
 		Sign sign = (Sign) e.getBlock().getState().getData();
 		Block attached = e.getBlock().getRelative(sign.getAttachedFace());
 		if(attached.getType() == Material.CHEST)
 		{
 			if(e.getLine(0).equalsIgnoreCase("[geocraft]"))
 			{
+				String cacheName = e.getLine(1).toLowerCase();
+				
 				if(e.getLine(1).equalsIgnoreCase(""))
 				{
 					p.sendMessage(ChatColor.RED + "[GeoCraft] Line 2 is empty, please enter the geocache name.");
+					e.setLine(0, "");
+					e.getBlock().breakNaturally();
 				}
 				
 				else
 				{
-					e.setLine(0, ChatColor.DARK_BLUE + "[GeoCraft]");
-					e.setLine(2, ChatColor.DARK_RED + "Hidden by");
-					e.setLine(3, ChatColor.DARK_RED + playerName);
-					p.sendMessage(ChatColor.GREEN + "[GeoCraft] Geocache created.");
-					String cacheName = e.getLine(1);
-	
-					config.set("geocaches." + cacheName + ".hider", playerName);
-					saveConfig();
+					if(!(config.getConfigurationSection("geocaches").get(cacheName) == null))
+					{
+						p.sendMessage(ChatColor.RED + "[GeoCraft] Geocache " + cacheName + " already exists.");
+						e.setLine(0, "");
+						e.getBlock().breakNaturally();
+					}
+					else
+					{
+						float locX = e.getBlock().getX();
+						float locY = e.getBlock().getY();
+						float locZ = e.getBlock().getZ();						
+						
+						e.setLine(0, ChatColor.DARK_BLUE + "[GeoCraft]");
+						e.setLine(1, e.getLine(1).toLowerCase());
+						e.setLine(2, ChatColor.DARK_RED + "Hidden by");
+						e.setLine(3, ChatColor.DARK_RED + playerName);
+						p.sendMessage(ChatColor.GREEN + "[GeoCraft] Geocache "+ cacheName + " created.");
+		
+						config.set("geocaches." + cacheName + ".hider", playerName);
+						config.set("geocaches." + cacheName + ".x", locX);
+						config.set("geocaches." + cacheName + ".y", locY);
+						config.set("geocaches." + cacheName + ".z", locZ);
+						saveConfig();
+					}
 					
 				}
 			}
@@ -90,7 +111,7 @@ public class GeoCraft extends JavaPlugin implements Listener
 			{
 				config.set("geocaches." + sign.getLine(1), null);
 				saveConfig();
-				e.getPlayer().sendMessage(ChatColor.GREEN + "[GeoCraft] Geocache deleted.");
+				e.getPlayer().sendMessage(ChatColor.GREEN + "[GeoCraft] Geocache " + sign.getLine(1) + " deleted.");
 			}
 			
 		}
@@ -105,7 +126,7 @@ public class GeoCraft extends JavaPlugin implements Listener
 			if(args.length == 0) //Player types /geo without arguments
 			{
 				sender.sendMessage("Available commands:");
-				sender.sendMessage(ChatColor.GOLD + "/geo list: " + ChatColor.WHITE + "Shows all listed geocaches");	
+				sender.sendMessage(ChatColor.GOLD + "/geo list: " + ChatColor.WHITE + "Shows all listed geocaches.");	
 				return true;
 			}
 			
@@ -118,9 +139,16 @@ public class GeoCraft extends JavaPlugin implements Listener
 					
 					for(String geoKey : config.getConfigurationSection("geocaches").getKeys(false))
 					{
-						geonr++;
-						
-						sender.sendMessage(ChatColor.AQUA + "" + geonr + ". " + geoKey);
+						if(!(geoKey == null))
+						{
+							geonr++;
+							sender.sendMessage(ChatColor.AQUA + "" + geonr + ". " + geoKey);
+						}
+						else
+						{
+							sender.sendMessage(ChatColor.RED + "There are no listed geocaches.");
+							
+						}
 						
 					}
 					return true;
@@ -133,35 +161,76 @@ public class GeoCraft extends JavaPlugin implements Listener
 					return true;
 				}
 				
+				if(args[0].equalsIgnoreCase("nav"))
+				{
+					if(args.length == 1)
+					{
+						sender.sendMessage(ChatColor.RED + "[GeoCraft] Usage: /geo nav <geocache name>");
+						
+					}
+					else
+					{
+						if(sender instanceof Player)
+						{
+							Player p = (Player) sender;
+							if(config.getConfigurationSection("geocaches").get(args[1]) != null)
+							{
+								double locX = config.getConfigurationSection("geocaches").getDouble(args[1].toLowerCase() + ".x");
+								double locY = config.getConfigurationSection("geocaches").getDouble(args[1].toLowerCase() + ".y");
+								double locZ = config.getConfigurationSection("geocaches").getDouble(args[1].toLowerCase() + ".z");
+								World world = Bukkit.getServer().getWorld("world");
+								Location loc = new Location(world, locX, locY, locZ);
+								
+								p.setCompassTarget(loc);
+								p.sendMessage(ChatColor.GREEN + "[GeoCraft] Compass pointing at " + args[1]);
+							}
+							else
+							{
+								p.sendMessage(ChatColor.RED + "[GeoCraft] That geocache doesn't exist. Use /geo list to see a list of available geocaches.");
+								
+							}
+						
+						
+						}
+					}
+				}
+					else
+					{
+						sender.sendMessage("[GeoCraft] This command can only be run in-game.");
+					}
+					
+					
+					return true;
+				}
+				
 				else
 				{
-					sender.sendMessage(ChatColor.RED + "Unknown argument, use /geo help to see a list of available commands.");
+					sender.sendMessage(ChatColor.RED + "[GeoCraft] Unknown argument, use /geo help to see a list of available commands.");
 					return false;
 				}
 			}
-		}
+		
 		
 		return false;
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
