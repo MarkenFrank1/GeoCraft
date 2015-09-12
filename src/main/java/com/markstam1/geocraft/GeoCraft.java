@@ -3,18 +3,15 @@ package com.markstam1.geocraft;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.UUID;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class GeoCraft extends JavaPlugin implements Listener
@@ -24,16 +21,16 @@ public class GeoCraft extends JavaPlugin implements Listener
 	FileConfiguration config = YamlConfiguration.loadConfiguration(geocachesfile);
 	String geoTarget;
 	public HashSet<String> navigating = new HashSet<String>();
-	
 
 	public void onEnable()
 	{
-		getServer().getPluginManager().registerEvents(new SignListener(), this);
-		getServer().getPluginManager().registerEvents(new BlockListener(), this);
-		getCommand("geo").setExecutor(new CommandListener());
+		getServer().getPluginManager().registerEvents(new SignListener(this), this);
+		getServer().getPluginManager().registerEvents(new BlockListener(this), this);
+		getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+		getCommand("geo").setExecutor(new CommandListener(this));
+		
 		saveConfig();
 	}
-	
 	
 	public void saveConfig()
 	{
@@ -75,9 +72,11 @@ public class GeoCraft extends JavaPlugin implements Listener
 	    return null;
 	}
 	
-	public boolean isGeocacheOwner(String playerName, String cacheName)
+	public boolean isGeocacheOwner(UUID playerID, String cacheName)
 	{
-		if(config.getConfigurationSection("geocaches").getString(cacheName + ".hider") == playerName)
+		String playerIDtoString = playerID.toString();
+		String hiderID = config.getString("geocaches." + cacheName + ".hiderid");
+		if(playerIDtoString.equals(hiderID))
 		{
 			return true;
 		}
@@ -86,22 +85,5 @@ public class GeoCraft extends JavaPlugin implements Listener
 		{
 			return false;
 		}
-		
 	}
-
-	@EventHandler
-	public void onPlayerInteract(PlayerInteractEvent e)
-	{
-		Player p = e.getPlayer();
-		
-		if(p.getItemInHand().getType() == Material.COMPASS)
-		{
-			if(navigating.contains(p.getName()))
-			{
-				p.sendMessage(ChatColor.GREEN + "[GeoCraft] Compass pointing at " + geoTarget);
-			}
-		}
-	}
-	
-	
 }

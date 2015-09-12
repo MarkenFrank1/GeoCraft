@@ -9,7 +9,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class PlayerListener implements Listener
 {
-	public static GeoCraft plugin;
+	public GeoCraft plugin;
+	
+	public PlayerListener(GeoCraft plugin)
+	{
+        this.plugin = plugin;
+	}
 	
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e)
@@ -20,7 +25,8 @@ public class PlayerListener implements Listener
 		{
 			if(plugin.navigating.contains(p.getName()))
 			{
-				p.sendMessage(ChatColor.GREEN + "[GeoCraft] Compass pointing at " + plugin.geoTarget);
+				int distance = (int) Math.round(p.getLocation().distance(p.getCompassTarget()));
+				p.sendMessage(ChatColor.GREEN + "[GeoCraft] Geocache " + plugin.geoTarget + " is " + distance + " blocks away.");
 			}
 		}
 	}

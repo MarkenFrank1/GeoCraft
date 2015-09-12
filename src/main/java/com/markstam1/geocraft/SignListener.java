@@ -11,7 +11,12 @@ import org.bukkit.material.Sign;
 
 public class SignListener implements Listener
 {
-	public static GeoCraft plugin;
+	public GeoCraft plugin;
+	
+	public SignListener(GeoCraft plugin)
+	{
+        this.plugin = plugin;
+	}
 	
 	@EventHandler
 	public void onSignChange(SignChangeEvent e)
@@ -55,7 +60,7 @@ public class SignListener implements Listener
 						p.sendMessage(ChatColor.GREEN + "[GeoCraft] Geocache "+ cacheName + " created.");
 						
 						plugin.config.set("geocaches." + cacheName + ".hider", playerName);
-						plugin.config.set("geocaches." + cacheName + ".hiderid", p.getUniqueId());
+						plugin.config.set("geocaches." + cacheName + ".hiderid", p.getUniqueId().toString());
 						plugin.config.set("geocaches." + cacheName + ".x", locX);
 						plugin.config.set("geocaches." + cacheName + ".y", locY);
 						plugin.config.set("geocaches." + cacheName + ".z", locZ);

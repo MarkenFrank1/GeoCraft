@@ -11,7 +11,12 @@ import org.bukkit.event.block.BlockBreakEvent;
 
 public class BlockListener implements Listener
 {
-	public static GeoCraft plugin;
+	public GeoCraft plugin;
+	
+	public BlockListener(GeoCraft plugin)
+	{
+        this.plugin = plugin;
+	}
 	
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e)
@@ -25,8 +30,7 @@ public class BlockListener implements Listener
 			if(firstLine.equalsIgnoreCase("[GeoCraft]"))
 			{
 				Player p = e.getPlayer();
-				String playerName = p.getName();
-				if(plugin.isGeocacheOwner(playerName, sign.getLine(1)))
+				if(plugin.isGeocacheOwner(p.getUniqueId(), sign.getLine(1)))
 				{
 					plugin.config.set("geocaches." + sign.getLine(1), null);
 					plugin.saveConfig();
@@ -45,7 +49,6 @@ public class BlockListener implements Listener
 		if(block.getType() == Material.CHEST)
 		{
 			Player p = e.getPlayer();
-			String playerName = p.getName();
 			BlockFace signface = plugin.getAttachedSignBlockFace(block);
 			org.bukkit.block.Sign attachedSign = (org.bukkit.block.Sign) block.getRelative(signface).getState();
 			
@@ -54,7 +57,7 @@ public class BlockListener implements Listener
 			String firstLine = ChatColor.stripColor(attachedSign.getLine(0));
 			if(firstLine.equalsIgnoreCase("[geocraft]"))
 			{
-				if(plugin.isGeocacheOwner(playerName, attachedSign.getLine(1)))
+				if(plugin.isGeocacheOwner(p.getUniqueId(), attachedSign.getLine(1)))
 				{
 					plugin.config.set("geocaches." + attachedSign.getLine(1), null);
 					plugin.saveConfig();

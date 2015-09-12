@@ -10,9 +10,22 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class CommandListener implements CommandExecutor {
+public class CommandListener implements CommandExecutor
+{
+	public GeoCraft plugin;
 	
-	public static GeoCraft plugin;
+	public CommandListener(GeoCraft plugin)
+	{
+        this.plugin = plugin;
+	}
+	
+	public void showHelp(CommandSender sender)
+	{
+		sender.sendMessage("Available commands:");
+		sender.sendMessage(ChatColor.GOLD + "/geo list: " + ChatColor.WHITE + "Shows all listed geocaches");					
+		sender.sendMessage(ChatColor.GOLD + "/geo nav: " + ChatColor.WHITE + "Navigate to a geocache.");				
+		sender.sendMessage(ChatColor.GOLD + "/geo reload: " + ChatColor.WHITE + "Reload geocaches and config");		
+	}
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
@@ -21,8 +34,7 @@ public class CommandListener implements CommandExecutor {
 		{
 			if(args.length == 0) //Player types /geo without arguments
 			{
-				sender.sendMessage("Available commands:");
-				sender.sendMessage(ChatColor.GOLD + "/geo list: " + ChatColor.WHITE + "Shows all listed geocaches.");	
+				showHelp(sender);
 				return true;
 			}
 			
@@ -52,10 +64,7 @@ public class CommandListener implements CommandExecutor {
 				
 				if(args[0].equalsIgnoreCase("help"))
 				{
-					sender.sendMessage("Available commands:");
-					sender.sendMessage(ChatColor.GOLD + "/geo list: " + ChatColor.WHITE + "Shows all listed geocaches");					
-					sender.sendMessage(ChatColor.GOLD + "/geo nav: " + ChatColor.WHITE + "Navigate to a geocache.");				
-					sender.sendMessage(ChatColor.GOLD + "/geo reload: " + ChatColor.WHITE + "Reload geocaches and config");				
+					showHelp(sender);			
 					return true;
 				}
 				
