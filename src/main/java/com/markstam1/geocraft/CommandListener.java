@@ -23,8 +23,9 @@ public class CommandListener implements CommandExecutor
 	{
 		sender.sendMessage("Available commands:");
 		sender.sendMessage(ChatColor.GOLD + "/geo list: " + ChatColor.WHITE + "Shows all listed geocaches");					
-		sender.sendMessage(ChatColor.GOLD + "/geo nav: " + ChatColor.WHITE + "Navigate to a geocache.");				
-		sender.sendMessage(ChatColor.GOLD + "/geo reload: " + ChatColor.WHITE + "Reload geocaches and config");		
+		sender.sendMessage(ChatColor.GOLD + "/geo nav: " + ChatColor.WHITE + "Navigate to a geocache");				
+		sender.sendMessage(ChatColor.GOLD + "/geo reload: " + ChatColor.WHITE + "Reload geocaches and config");
+		sender.sendMessage(ChatColor.GOLD + "/geo delete: " + ChatColor.WHITE + "Deletes geocache with given name");		
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package com.markstam1.geocraft;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -7,6 +8,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Sign;
 
 public class SignListener implements Listener
@@ -66,6 +70,21 @@ public class SignListener implements Listener
 						plugin.config.set("geocaches." + cacheName + ".z", locZ);
 						plugin.config.set("geocaches." + cacheName + ".world", worldName);
 						plugin.saveConfig();
+						
+						Inventory cacheInv = Bukkit.createInventory(e.getPlayer(), 27, cacheName);
+						ItemStack logbook = new ItemStack(Material.BOOK);
+						ItemMeta logMeta = logbook.getItemMeta();
+						logMeta.setDisplayName(ChatColor.GREEN + "Logbook");
+						logbook.setItemMeta(logMeta);
+						cacheInv.addItem(logbook);
+						
+						ItemStack feather = new ItemStack(Material.FEATHER);
+						ItemMeta featherMeta = feather.getItemMeta();
+						featherMeta.setDisplayName(ChatColor.GOLD + "Sign logbook");
+						feather.setItemMeta(featherMeta);
+						cacheInv.setItem(13, feather);
+						
+						plugin.cacheInvs.put(cacheName, cacheInv);
 					}
 					
 				}

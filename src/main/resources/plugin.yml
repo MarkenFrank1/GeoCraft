@@ -1,6 +1,6 @@
 name: GeoCraft
 main: com.markstam1.geocraft.GeoCraft
-version: 0.2
+version: 0.3
 commands:
   geo:
     description: GeoCraft main command.
